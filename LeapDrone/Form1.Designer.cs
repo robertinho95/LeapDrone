@@ -86,6 +86,7 @@
             this.chartGroupBox = new System.Windows.Forms.GroupBox();
             this.linesRadioButton = new System.Windows.Forms.RadioButton();
             this.loggerButton = new System.Windows.Forms.Button();
+            this.chartCheckBox = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.displayImages)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.rollChart)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pitchChart)).BeginInit();
@@ -540,11 +541,24 @@
             this.loggerButton.UseVisualStyleBackColor = true;
             this.loggerButton.Click += new System.EventHandler(this.loggerButton_Click);
             // 
+            // chartCheckBox
+            // 
+            this.chartCheckBox.AutoSize = true;
+            this.chartCheckBox.Checked = true;
+            this.chartCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chartCheckBox.Location = new System.Drawing.Point(754, 488);
+            this.chartCheckBox.Name = "chartCheckBox";
+            this.chartCheckBox.Size = new System.Drawing.Size(83, 17);
+            this.chartCheckBox.TabIndex = 42;
+            this.chartCheckBox.Text = "Draw charts";
+            this.chartCheckBox.UseVisualStyleBackColor = true;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(891, 1267);
+            this.Controls.Add(this.chartCheckBox);
             this.Controls.Add(this.loggerButton);
             this.Controls.Add(this.chartGroupBox);
             this.Controls.Add(this.frameCheckBox);
@@ -644,6 +658,7 @@
         private System.Windows.Forms.GroupBox chartGroupBox;
         private System.Windows.Forms.RadioButton linesRadioButton;
         private System.Windows.Forms.Button loggerButton;
+        private System.Windows.Forms.CheckBox chartCheckBox;
     }
 }
 

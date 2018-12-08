@@ -22,6 +22,7 @@ namespace LeapDrone
 
         // Declaring one joystick (Device id 1) and a position structure. 
         static public vJoy joystick;
+        static public vJoy.JoystickState iReport;
         static public uint id = 1; // check ID!!!
         static public long maxvalue = 0;
         static public long minvalue = 0;
@@ -49,6 +50,7 @@ namespace LeapDrone
 
             // Create one joystick object and a position structure.
             joystick = new vJoy();
+            iReport = new vJoy.JoystickState();
 
             // Get the driver attributes (Vendor ID, Product ID, Version Number)
             if (!joystick.vJoyEnabled())
@@ -254,8 +256,9 @@ namespace LeapDrone
 
             myLog.LogHand(thisHand);
 
-            if((thisFrame.Id % 3) == 0)
-                myCircularBuff.Add(thisHand);
+            if (sender.chartCheckBox.Checked)
+                if ((thisFrame.Id % 3) == 0)
+                    myCircularBuff.Add(thisHand);
         }
 
         void newFrameHandler(object sender, FrameEventArgs eventArgs)
@@ -339,12 +342,26 @@ namespace LeapDrone
         {
             while (true)
             {
-                joystick.SetAxis(X, id, HID_USAGES.HID_USAGE_X);
-                joystick.SetAxis(Y, id, HID_USAGES.HID_USAGE_Y);
-                joystick.SetAxis(RX, id, HID_USAGES.HID_USAGE_RX);
-                joystick.SetAxis(RY, id, HID_USAGES.HID_USAGE_RY);
+                iReport.bDevice = (byte)id;
+                iReport.AxisX = X;
+                iReport.AxisY = Y;
+                iReport.AxisXRot = RX;
+                iReport.AxisYRot = RY;
 
-                if (IsHandleCreated)
+                /*** Feed the driver with the position packet - is fails then wait for input then try to re-acquire device ***/
+                if (!joystick.UpdateVJD(id, ref iReport))
+                {
+                    Console.WriteLine("Feeding vJoy device number {0} failed - try to enable device then press enter\n", id);
+                    System.Threading.Thread.Sleep(40);
+                    joystick.AcquireVJD(id);
+                }
+
+                //joystick.SetAxis(X, id, HID_USAGES.HID_USAGE_X);
+                //joystick.SetAxis(Y, id, HID_USAGES.HID_USAGE_Y);
+                //joystick.SetAxis(RX, id, HID_USAGES.HID_USAGE_RX);
+                //joystick.SetAxis(RY, id, HID_USAGES.HID_USAGE_RY);
+
+                if (IsHandleCreated && chartCheckBox.Checked)
                 {
                     long from = myCircularBuff.FindIndex(5000000);
                     long to = myCircularBuff.buffLenght();
