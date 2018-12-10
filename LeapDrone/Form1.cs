@@ -355,12 +355,7 @@ namespace LeapDrone
                     System.Threading.Thread.Sleep(40);
                     joystick.AcquireVJD(id);
                 }
-
-                //joystick.SetAxis(X, id, HID_USAGES.HID_USAGE_X);
-                //joystick.SetAxis(Y, id, HID_USAGES.HID_USAGE_Y);
-                //joystick.SetAxis(RX, id, HID_USAGES.HID_USAGE_RX);
-                //joystick.SetAxis(RY, id, HID_USAGES.HID_USAGE_RY);
-
+                
                 if (IsHandleCreated && chartCheckBox.Checked)
                 {
                     long from = myCircularBuff.FindIndex(5000000);
