@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
             System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
             System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
@@ -87,12 +88,43 @@
             this.linesRadioButton = new System.Windows.Forms.RadioButton();
             this.loggerButton = new System.Windows.Forms.Button();
             this.chartCheckBox = new System.Windows.Forms.CheckBox();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.radioButton2 = new System.Windows.Forms.RadioButton();
+            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.radioButton1 = new System.Windows.Forms.RadioButton();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.progressBar1 = new System.Windows.Forms.ProgressBar();
+            this.btnClose = new System.Windows.Forms.Button();
+            this.btnOpen = new System.Windows.Forms.Button();
+            this.cBoxParityBits = new System.Windows.Forms.ComboBox();
+            this.cBoxStopBits = new System.Windows.Forms.ComboBox();
+            this.cBoxDataBits = new System.Windows.Forms.ComboBox();
+            this.cBoxBaudRate = new System.Windows.Forms.ComboBox();
+            this.cBoxCOMPORT = new System.Windows.Forms.ComboBox();
+            this.label18 = new System.Windows.Forms.Label();
+            this.label17 = new System.Windows.Forms.Label();
+            this.label16 = new System.Windows.Forms.Label();
+            this.label9 = new System.Windows.Forms.Label();
+            this.label8 = new System.Windows.Forms.Label();
+            this.button1 = new System.Windows.Forms.Button();
+            this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.tB_Run = new System.Windows.Forms.TextBox();
+            this.button2 = new System.Windows.Forms.Button();
+            this.serialPort1 = new System.IO.Ports.SerialPort(this.components);
+            this.flightMode = new System.Windows.Forms.GroupBox();
+            this.modeRate = new System.Windows.Forms.RadioButton();
+            this.modeHorizon = new System.Windows.Forms.RadioButton();
+            this.modeStabilized = new System.Windows.Forms.RadioButton();
             ((System.ComponentModel.ISupportInitialize)(this.displayImages)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.rollChart)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pitchChart)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.heightChart)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.yawChart)).BeginInit();
             this.chartGroupBox.SuspendLayout();
+            this.groupBox1.SuspendLayout();
+            this.groupBox2.SuspendLayout();
+            this.groupBox3.SuspendLayout();
+            this.flightMode.SuspendLayout();
             this.SuspendLayout();
             // 
             // displayID
@@ -402,7 +434,7 @@
             series1.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.UInt64;
             series1.YValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.UInt32;
             this.rollChart.Series.Add(series1);
-            this.rollChart.Size = new System.Drawing.Size(863, 181);
+            this.rollChart.Size = new System.Drawing.Size(1091, 181);
             this.rollChart.TabIndex = 34;
             this.rollChart.Text = "Roll";
             title1.Name = "Title1";
@@ -428,7 +460,7 @@
             series2.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.UInt64;
             series2.YValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.UInt32;
             this.pitchChart.Series.Add(series2);
-            this.pitchChart.Size = new System.Drawing.Size(863, 181);
+            this.pitchChart.Size = new System.Drawing.Size(1090, 181);
             this.pitchChart.TabIndex = 35;
             this.pitchChart.Text = "Pitch";
             title2.Name = "Title1";
@@ -480,7 +512,7 @@
             series4.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.UInt64;
             series4.YValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.UInt32;
             this.yawChart.Series.Add(series4);
-            this.yawChart.Size = new System.Drawing.Size(863, 181);
+            this.yawChart.Size = new System.Drawing.Size(1091, 181);
             this.yawChart.TabIndex = 36;
             this.yawChart.Text = "Yaw";
             title4.Name = "Title1";
@@ -520,6 +552,7 @@
             this.chartGroupBox.TabIndex = 40;
             this.chartGroupBox.TabStop = false;
             this.chartGroupBox.Text = "Chart type";
+            this.chartGroupBox.Enter += new System.EventHandler(this.chartGroupBox_Enter);
             // 
             // linesRadioButton
             // 
@@ -530,6 +563,7 @@
             this.linesRadioButton.TabIndex = 40;
             this.linesRadioButton.Text = "Lines";
             this.linesRadioButton.UseVisualStyleBackColor = true;
+            this.linesRadioButton.CheckedChanged += new System.EventHandler(this.linesRadioButton_CheckedChanged);
             // 
             // loggerButton
             // 
@@ -553,11 +587,309 @@
             this.chartCheckBox.Text = "Draw charts";
             this.chartCheckBox.UseVisualStyleBackColor = true;
             // 
+            // groupBox1
+            // 
+            this.groupBox1.Controls.Add(this.radioButton2);
+            this.groupBox1.Controls.Add(this.textBox1);
+            this.groupBox1.Controls.Add(this.radioButton1);
+            this.groupBox1.Location = new System.Drawing.Point(906, 25);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(200, 72);
+            this.groupBox1.TabIndex = 43;
+            this.groupBox1.TabStop = false;
+            this.groupBox1.Text = "Control Out";
+            // 
+            // radioButton2
+            // 
+            this.radioButton2.AutoSize = true;
+            this.radioButton2.Location = new System.Drawing.Point(13, 43);
+            this.radioButton2.Name = "radioButton2";
+            this.radioButton2.Size = new System.Drawing.Size(68, 17);
+            this.radioButton2.TabIndex = 2;
+            this.radioButton2.TabStop = true;
+            this.radioButton2.Text = "Simulator";
+            this.radioButton2.UseVisualStyleBackColor = true;
+            // 
+            // textBox1
+            // 
+            this.textBox1.Location = new System.Drawing.Point(107, 20);
+            this.textBox1.Name = "textBox1";
+            this.textBox1.Size = new System.Drawing.Size(74, 20);
+            this.textBox1.TabIndex = 1;
+            this.textBox1.Text = "Serial Comm";
+            // 
+            // radioButton1
+            // 
+            this.radioButton1.AutoSize = true;
+            this.radioButton1.Checked = true;
+            this.radioButton1.Location = new System.Drawing.Point(13, 20);
+            this.radioButton1.Name = "radioButton1";
+            this.radioButton1.Size = new System.Drawing.Size(83, 17);
+            this.radioButton1.TabIndex = 0;
+            this.radioButton1.TabStop = true;
+            this.radioButton1.Text = "Serial Comm";
+            this.radioButton1.UseVisualStyleBackColor = true;
+            this.radioButton1.CheckedChanged += new System.EventHandler(this.radioButton1_CheckedChanged);
+            // 
+            // groupBox2
+            // 
+            this.groupBox2.Controls.Add(this.progressBar1);
+            this.groupBox2.Controls.Add(this.btnClose);
+            this.groupBox2.Controls.Add(this.btnOpen);
+            this.groupBox2.Controls.Add(this.cBoxParityBits);
+            this.groupBox2.Controls.Add(this.cBoxStopBits);
+            this.groupBox2.Controls.Add(this.cBoxDataBits);
+            this.groupBox2.Controls.Add(this.cBoxBaudRate);
+            this.groupBox2.Controls.Add(this.cBoxCOMPORT);
+            this.groupBox2.Controls.Add(this.label18);
+            this.groupBox2.Controls.Add(this.label17);
+            this.groupBox2.Controls.Add(this.label16);
+            this.groupBox2.Controls.Add(this.label9);
+            this.groupBox2.Controls.Add(this.label8);
+            this.groupBox2.Location = new System.Drawing.Point(906, 103);
+            this.groupBox2.Name = "groupBox2";
+            this.groupBox2.Size = new System.Drawing.Size(200, 260);
+            this.groupBox2.TabIndex = 44;
+            this.groupBox2.TabStop = false;
+            this.groupBox2.Text = "Com Port Control";
+            // 
+            // progressBar1
+            // 
+            this.progressBar1.Location = new System.Drawing.Point(23, 212);
+            this.progressBar1.Name = "progressBar1";
+            this.progressBar1.Size = new System.Drawing.Size(157, 23);
+            this.progressBar1.TabIndex = 12;
+            this.progressBar1.Click += new System.EventHandler(this.progressBar1_Click);
+            // 
+            // btnClose
+            // 
+            this.btnClose.Location = new System.Drawing.Point(106, 175);
+            this.btnClose.Name = "btnClose";
+            this.btnClose.Size = new System.Drawing.Size(75, 23);
+            this.btnClose.TabIndex = 11;
+            this.btnClose.Text = "Close";
+            this.btnClose.UseVisualStyleBackColor = true;
+            this.btnClose.Click += new System.EventHandler(this.btnClose_Click);
+            // 
+            // btnOpen
+            // 
+            this.btnOpen.Location = new System.Drawing.Point(24, 175);
+            this.btnOpen.Name = "btnOpen";
+            this.btnOpen.Size = new System.Drawing.Size(75, 23);
+            this.btnOpen.TabIndex = 10;
+            this.btnOpen.Text = "Open";
+            this.btnOpen.UseVisualStyleBackColor = true;
+            this.btnOpen.Click += new System.EventHandler(this.button3_Click);
+            // 
+            // cBoxParityBits
+            // 
+            this.cBoxParityBits.FormattingEnabled = true;
+            this.cBoxParityBits.Items.AddRange(new object[] {
+            "None",
+            "Odd",
+            "Even"});
+            this.cBoxParityBits.Location = new System.Drawing.Point(105, 134);
+            this.cBoxParityBits.Name = "cBoxParityBits";
+            this.cBoxParityBits.Size = new System.Drawing.Size(75, 21);
+            this.cBoxParityBits.TabIndex = 9;
+            this.cBoxParityBits.Text = "None";
+            // 
+            // cBoxStopBits
+            // 
+            this.cBoxStopBits.FormattingEnabled = true;
+            this.cBoxStopBits.Items.AddRange(new object[] {
+            "One",
+            "Two"});
+            this.cBoxStopBits.Location = new System.Drawing.Point(105, 109);
+            this.cBoxStopBits.Name = "cBoxStopBits";
+            this.cBoxStopBits.Size = new System.Drawing.Size(75, 21);
+            this.cBoxStopBits.TabIndex = 8;
+            this.cBoxStopBits.Text = "One";
+            // 
+            // cBoxDataBits
+            // 
+            this.cBoxDataBits.FormattingEnabled = true;
+            this.cBoxDataBits.Items.AddRange(new object[] {
+            "6",
+            "7",
+            "8"});
+            this.cBoxDataBits.Location = new System.Drawing.Point(105, 84);
+            this.cBoxDataBits.Name = "cBoxDataBits";
+            this.cBoxDataBits.Size = new System.Drawing.Size(75, 21);
+            this.cBoxDataBits.TabIndex = 7;
+            this.cBoxDataBits.Text = "8";
+            // 
+            // cBoxBaudRate
+            // 
+            this.cBoxBaudRate.FormattingEnabled = true;
+            this.cBoxBaudRate.Items.AddRange(new object[] {
+            "2400",
+            "4800",
+            "9600",
+            "19200",
+            "38400",
+            "115200"});
+            this.cBoxBaudRate.Location = new System.Drawing.Point(105, 59);
+            this.cBoxBaudRate.Name = "cBoxBaudRate";
+            this.cBoxBaudRate.Size = new System.Drawing.Size(75, 21);
+            this.cBoxBaudRate.TabIndex = 6;
+            this.cBoxBaudRate.Text = "9600";
+            // 
+            // cBoxCOMPORT
+            // 
+            this.cBoxCOMPORT.FormattingEnabled = true;
+            this.cBoxCOMPORT.Location = new System.Drawing.Point(105, 34);
+            this.cBoxCOMPORT.Name = "cBoxCOMPORT";
+            this.cBoxCOMPORT.Size = new System.Drawing.Size(75, 21);
+            this.cBoxCOMPORT.TabIndex = 5;
+            this.cBoxCOMPORT.SelectedIndexChanged += new System.EventHandler(this.cBoxCOMPORT_SelectedIndexChanged);
+            this.cBoxCOMPORT.Enter += new System.EventHandler(this.cBoxCOMPORT_Enter);
+            this.cBoxCOMPORT.MouseClick += new System.Windows.Forms.MouseEventHandler(this.cBoxCOMPORT_MouseClick);
+            // 
+            // label18
+            // 
+            this.label18.AutoSize = true;
+            this.label18.Location = new System.Drawing.Point(21, 137);
+            this.label18.Name = "label18";
+            this.label18.Size = new System.Drawing.Size(53, 13);
+            this.label18.TabIndex = 4;
+            this.label18.Text = "Parity Bits";
+            // 
+            // label17
+            // 
+            this.label17.AutoSize = true;
+            this.label17.Location = new System.Drawing.Point(21, 112);
+            this.label17.Name = "label17";
+            this.label17.Size = new System.Drawing.Size(49, 13);
+            this.label17.TabIndex = 3;
+            this.label17.Text = "Stop Bits";
+            // 
+            // label16
+            // 
+            this.label16.AutoSize = true;
+            this.label16.Location = new System.Drawing.Point(21, 87);
+            this.label16.Name = "label16";
+            this.label16.Size = new System.Drawing.Size(50, 13);
+            this.label16.TabIndex = 2;
+            this.label16.Text = "Data Bits";
+            this.label16.Click += new System.EventHandler(this.label16_Click);
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Location = new System.Drawing.Point(21, 62);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(58, 13);
+            this.label9.TabIndex = 1;
+            this.label9.Text = "Baud Rate";
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(21, 37);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(50, 13);
+            this.label8.TabIndex = 0;
+            this.label8.Text = "Com Port";
+            this.label8.Click += new System.EventHandler(this.label8_Click);
+            // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(24, 24);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(75, 35);
+            this.button1.TabIndex = 45;
+            this.button1.Text = "Start";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
+            // groupBox3
+            // 
+            this.groupBox3.Controls.Add(this.tB_Run);
+            this.groupBox3.Controls.Add(this.button2);
+            this.groupBox3.Controls.Add(this.button1);
+            this.groupBox3.Location = new System.Drawing.Point(906, 375);
+            this.groupBox3.Name = "groupBox3";
+            this.groupBox3.Size = new System.Drawing.Size(200, 109);
+            this.groupBox3.TabIndex = 46;
+            this.groupBox3.TabStop = false;
+            this.groupBox3.Text = "Start - Stop";
+            this.groupBox3.Enter += new System.EventHandler(this.groupBox3_Enter);
+            // 
+            // tB_Run
+            // 
+            this.tB_Run.Location = new System.Drawing.Point(25, 75);
+            this.tB_Run.Name = "tB_Run";
+            this.tB_Run.ReadOnly = true;
+            this.tB_Run.Size = new System.Drawing.Size(156, 20);
+            this.tB_Run.TabIndex = 47;
+            this.tB_Run.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.tB_Run.TextChanged += new System.EventHandler(this.tB_Run_TextChanged);
+            // 
+            // button2
+            // 
+            this.button2.Location = new System.Drawing.Point(107, 24);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(74, 35);
+            this.button2.TabIndex = 46;
+            this.button2.Text = "Stop";
+            this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.button2_Click);
+            // 
+            // flightMode
+            // 
+            this.flightMode.Controls.Add(this.modeRate);
+            this.flightMode.Controls.Add(this.modeHorizon);
+            this.flightMode.Controls.Add(this.modeStabilized);
+            this.flightMode.Location = new System.Drawing.Point(754, 375);
+            this.flightMode.Name = "flightMode";
+            this.flightMode.Size = new System.Drawing.Size(146, 95);
+            this.flightMode.TabIndex = 47;
+            this.flightMode.TabStop = false;
+            this.flightMode.Text = "Flight Mode";
+            // 
+            // modeRate
+            // 
+            this.modeRate.AutoSize = true;
+            this.modeRate.Location = new System.Drawing.Point(7, 65);
+            this.modeRate.Name = "modeRate";
+            this.modeRate.Size = new System.Drawing.Size(48, 17);
+            this.modeRate.TabIndex = 2;
+            this.modeRate.Text = "Rate";
+            this.modeRate.UseVisualStyleBackColor = true;
+            // 
+            // modeHorizon
+            // 
+            this.modeHorizon.AutoSize = true;
+            this.modeHorizon.Location = new System.Drawing.Point(7, 42);
+            this.modeHorizon.Name = "modeHorizon";
+            this.modeHorizon.Size = new System.Drawing.Size(61, 17);
+            this.modeHorizon.TabIndex = 1;
+            this.modeHorizon.Text = "Horizon";
+            this.modeHorizon.UseVisualStyleBackColor = true;
+            // 
+            // modeStabilized
+            // 
+            this.modeStabilized.AutoSize = true;
+            this.modeStabilized.Checked = true;
+            this.modeStabilized.Location = new System.Drawing.Point(7, 19);
+            this.modeStabilized.Name = "modeStabilized";
+            this.modeStabilized.Size = new System.Drawing.Size(70, 17);
+            this.modeStabilized.TabIndex = 0;
+            this.modeStabilized.TabStop = true;
+            this.modeStabilized.Text = "Stabilized";
+            this.modeStabilized.UseVisualStyleBackColor = true;
+            this.modeStabilized.CheckedChanged += new System.EventHandler(this.flightModeCheckedChanged);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(891, 1267);
+            this.ClientSize = new System.Drawing.Size(1118, 1061);
+            this.Controls.Add(this.flightMode);
+            this.Controls.Add(this.groupBox3);
+            this.Controls.Add(this.groupBox2);
+            this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.chartCheckBox);
             this.Controls.Add(this.loggerButton);
             this.Controls.Add(this.chartGroupBox);
@@ -602,6 +934,7 @@
             this.Name = "Form1";
             this.Text = "Frame Data";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.onClose);
+            this.Load += new System.EventHandler(this.Form1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.displayImages)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.rollChart)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pitchChart)).EndInit();
@@ -609,6 +942,14 @@
             ((System.ComponentModel.ISupportInitialize)(this.yawChart)).EndInit();
             this.chartGroupBox.ResumeLayout(false);
             this.chartGroupBox.PerformLayout();
+            this.groupBox1.ResumeLayout(false);
+            this.groupBox1.PerformLayout();
+            this.groupBox2.ResumeLayout(false);
+            this.groupBox2.PerformLayout();
+            this.groupBox3.ResumeLayout(false);
+            this.groupBox3.PerformLayout();
+            this.flightMode.ResumeLayout(false);
+            this.flightMode.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -659,6 +1000,33 @@
         private System.Windows.Forms.RadioButton linesRadioButton;
         private System.Windows.Forms.Button loggerButton;
         private System.Windows.Forms.CheckBox chartCheckBox;
+        private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.GroupBox groupBox2;
+        private System.Windows.Forms.Label label16;
+        private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.ProgressBar progressBar1;
+        private System.Windows.Forms.Button btnClose;
+        private System.Windows.Forms.Button btnOpen;
+        private System.Windows.Forms.ComboBox cBoxParityBits;
+        private System.Windows.Forms.ComboBox cBoxStopBits;
+        private System.Windows.Forms.ComboBox cBoxDataBits;
+        private System.Windows.Forms.ComboBox cBoxBaudRate;
+        private System.Windows.Forms.ComboBox cBoxCOMPORT;
+        private System.Windows.Forms.Label label18;
+        private System.Windows.Forms.Label label17;
+        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.RadioButton radioButton1;
+        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.GroupBox groupBox3;
+        private System.Windows.Forms.Button button2;
+        private System.IO.Ports.SerialPort serialPort1;
+        private System.Windows.Forms.RadioButton radioButton2;
+        private System.Windows.Forms.TextBox tB_Run;
+        private System.Windows.Forms.GroupBox flightMode;
+        private System.Windows.Forms.RadioButton modeRate;
+        private System.Windows.Forms.RadioButton modeHorizon;
+        private System.Windows.Forms.RadioButton modeStabilized;
     }
 }
 

@@ -10,7 +10,7 @@ using System.Windows.Forms;
 using System.Drawing.Imaging;
 using Leap;
 using System.IO;
-
+using System.IO.Ports;
 using vJoyInterfaceWrap;
 using System.Threading;
 
@@ -18,6 +18,10 @@ namespace LeapDrone
 {
     public partial class Form1 : Form
     {
+        // ********************************* software state variable ************************************
+        static bool run = false; // set by start button ; reset by stop button
+        static bool simulation = false; // (simulazione = 0) => serial comm port ; (simulazione = 1) => run simuletion 
+        static uint serialport_start = 0;
         // ******************************************* vJOY *********************************************
 
         // Declaring one joystick (Device id 1) and a position structure. 
@@ -27,7 +31,18 @@ namespace LeapDrone
         static public long maxvalue = 0;
         static public long minvalue = 0;
         static int X, Y, RX, RY;
-        static Thread t;
+        static Thread t, tS;
+
+        static public byte[] dataOUT = new byte[10];
+
+        enum flightModeEnum : byte
+        {
+            Stabilized,
+            Horizon,
+            Rate
+        }
+
+        flightModeEnum FlightMode = flightModeEnum.Stabilized;
 
 
         // ******************************************* **** *********************************************
@@ -44,13 +59,16 @@ namespace LeapDrone
         {
             InitializeComponent();
 
+            
             // ******************************************* **** *********************************************
             // **************************************** start_Vjoy ******************************************
             // ******************************************* **** *********************************************
 
+
             // Create one joystick object and a position structure.
             joystick = new vJoy();
             iReport = new vJoy.JoystickState();
+
 
             // Get the driver attributes (Vendor ID, Product ID, Version Number)
             if (!joystick.vJoyEnabled())
@@ -173,6 +191,9 @@ namespace LeapDrone
             t = new Thread(joyThread);
             t.Start();
 
+            tS = new Thread(serialThread);
+            tS.Start();
+
             // ******************************************* **** *********************************************
             // ***************************************** end_Vjoy *******************************************
             // ******************************************* **** *********************************************
@@ -189,8 +210,10 @@ namespace LeapDrone
                 grayscale.Entries[i] = Color.FromArgb((int)255, i, i, i);
             }
             bitmap.Palette = grayscale;
-        }
+            
 
+ 
+        }
         static void vJoyDataPack(Frame thisFrame, Form1 sender)
         {
             float ROLL = -99; // radinas
@@ -261,6 +284,103 @@ namespace LeapDrone
                     myCircularBuff.Add(thisHand);
         }
 
+        static void serialCommData_pack(Frame thisFrame, Form1 sender)
+        {
+            if (sender.serialPort1.IsOpen)
+            {
+                float ROLL = -99;    // radinas
+                float PITCH = -99;   // radinas
+                float YAW = -99;     // radinas
+                float THROTTLE = -99;
+                // PACK data for serial
+                if (thisFrame.Hands.Count > 0)
+                {
+                    myHand = thisFrame.Hands.ElementAt(0);
+                    ROLL = myHand.PalmNormal.Roll; // radinas
+                    PITCH = myHand.Direction.Pitch; // radinas
+                    YAW = myHand.Direction.Yaw; // radinas
+                    THROTTLE = myHand.PalmPosition.z; // millimeters
+                    if (THROTTLE < 200.0f) THROTTLE = 200.0f;
+                    else if (THROTTLE > 400.0f) THROTTLE = 400.0f;
+
+                    float costant_angle = (float)maxvalue / (1.0f * (float)Math.PI);
+                    float costant_distance = (float)maxvalue / (200.0f);
+                    float pi_half = (float)Math.PI / 2.0f;
+
+                    X = (int)((YAW + pi_half) * costant_angle);
+                    Y = (int)((THROTTLE - 200.0f) * costant_distance);
+                    RX = (int)((ROLL + pi_half) * costant_angle);
+                    RY = (int)((PITCH + pi_half) * costant_angle);
+
+                    if (X < minvalue) X = (int)minvalue; else if (X > maxvalue) X = (int)maxvalue;
+                    if (Y < minvalue) Y = (int)minvalue; else if (Y > maxvalue) Y = (int)maxvalue;
+                    if (RX < minvalue) RX = (int)minvalue; else if (RX > maxvalue) RX = (int)maxvalue;
+                    if (RY < minvalue) RY = (int)minvalue; else if (RY > maxvalue) RY = (int)maxvalue;
+
+                }
+                else
+                {
+                    X = (int)(minvalue + ((maxvalue - minvalue) / 2));
+                    RX = (int)(minvalue + ((maxvalue - minvalue) / 2));
+                    RY = (int)(minvalue + ((maxvalue - minvalue) / 2));
+                    Y = (int)(minvalue);
+                }
+                //Display raw values
+                sender.rollTXT.Text = ROLL.ToString();
+                sender.pitchTXT.Text = PITCH.ToString();
+                sender.yawTXT.Text = YAW.ToString();
+                sender.heightTXT.Text = THROTTLE.ToString();
+
+                //Display raw values
+                sender.rollJOY.Text = RX.ToString();
+                sender.pitchJOY.Text = RY.ToString();
+                sender.yawJOY.Text = X.ToString();
+                sender.heightJOY.Text = Y.ToString();
+
+                sender.yawProg.Value = (int)X;
+                sender.rollProg.Value = (int)RX;
+                sender.pitchProg.Value = (int)RY;
+                sender.heightProg.Value = (int)Y;
+
+                HandValue thisHand = new HandValue();
+                thisHand.Roll = RX;
+                thisHand.Pitch = RY;
+                thisHand.Yaw = X;
+                thisHand.Height = Y;
+                thisHand.Timestamp = thisFrame.Timestamp;
+
+
+                //scrittura nella seriale 
+                dataOUT[0] = (byte)'$';
+                dataOUT[1] = 85;
+
+                uint Roll_to_send = ((uint)RX >> 6);     // CH1
+                uint Yaw_to_send = ((uint)X >> 6);
+                uint Pitch_to_send = ((uint)RY >> 6);
+                uint Height_to_send = ((uint)Y >> 6);
+                uint arm_disarm = 1000;
+
+                if (run)
+                {
+                    arm_disarm = 0;     // armed
+                }
+                else
+                {
+                    arm_disarm = 1000;  // disarmed
+                }
+
+                dataOUT[2] = (byte)(Roll_to_send >> 2);
+                dataOUT[3] = (byte)((Roll_to_send << 6) | (Pitch_to_send >> 4));
+                dataOUT[4] = (byte)((Pitch_to_send << 4) | (Height_to_send >> 6));
+                dataOUT[5] = (byte)((Height_to_send << 2) | (Yaw_to_send >> 8));
+                dataOUT[6] = (byte)(Yaw_to_send);
+                dataOUT[7] = (byte)(arm_disarm >> 2);
+                dataOUT[8] = (byte)((arm_disarm << 8) | (byte)sender.FlightMode);
+                dataOUT[9] = (byte)'#';
+
+            }
+        }
+
         void newFrameHandler(object sender, FrameEventArgs eventArgs)
         {
             Frame frame = eventArgs.frame;
@@ -274,9 +394,15 @@ namespace LeapDrone
             this.displayFPS.Text = frame.CurrentFramesPerSecond.ToString();
             this.displayHandCount.Text = frame.Hands.Count.ToString();
 
+            if(simulation)
+            {
+                vJoyDataPack(frame, this);
+            }
+            else
+            {
+                serialCommData_pack(frame, this);
+            }
             
-
-            vJoyDataPack(frame, this);
         }
 
         void onImageRequestFailed(object sender, ImageRequestFailedEventArgs e)
@@ -315,6 +441,130 @@ namespace LeapDrone
                 loggerButton.Text = "Stop logger";
             else
                 loggerButton.Text = "Start logger";
+        }
+
+        private void label16_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label8_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void radioButton1_CheckedChanged(object sender, EventArgs e)
+        {
+            simulation = !(simulation);
+            if(simulation)
+            {
+                textBox1.Text = "simulation";
+            }
+            else
+            {
+                textBox1.Text = "Serial Comm";
+            }
+
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            run = true;
+            tB_Run.Text = "Run";
+        }
+
+        private void groupBox3_Enter(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            run = false;
+            tB_Run.Text = "Stop";
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            if(simulation==false)
+            {
+                try
+                {
+                    serialPort1.PortName = cBoxCOMPORT.Text;
+                    serialPort1.BaudRate = Convert.ToInt32(cBoxBaudRate.Text);
+                    serialPort1.DataBits = Convert.ToInt32(cBoxDataBits.Text);
+                    serialPort1.StopBits = (StopBits)Enum.Parse(typeof(StopBits), cBoxStopBits.Text);
+                    serialPort1.Parity = (Parity)Enum.Parse(typeof(Parity), cBoxParityBits.Text);
+
+                    serialPort1.Open();
+                    progressBar1.Value = 100;
+                }
+                catch (Exception err)
+                {
+                    MessageBox.Show(err.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            string[] ports = SerialPort.GetPortNames();
+            cBoxCOMPORT.Items.AddRange(ports);
+        }
+
+        private void btnClose_Click(object sender, EventArgs e)
+        {
+            if (serialPort1.IsOpen)
+            {
+                serialPort1.Close();
+                progressBar1.Value = 0;
+            }
+        }
+
+        private void linesRadioButton_CheckedChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void chartGroupBox_Enter(object sender, EventArgs e)
+        {
+
+        }
+
+        private void cBoxCOMPORT_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void progressBar1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void cBoxCOMPORT_Enter(object sender, EventArgs e)
+        {
+            string[] ports = SerialPort.GetPortNames();
+            cBoxCOMPORT.Items.Clear();
+            cBoxCOMPORT.Items.AddRange(ports);
+        }
+
+        private void cBoxCOMPORT_MouseClick(object sender, MouseEventArgs e)
+        {
+            string[] ports = SerialPort.GetPortNames();
+            cBoxCOMPORT.Items.Clear();
+            cBoxCOMPORT.Items.AddRange(ports);
+        }
+
+        private void tB_Run_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void flightModeCheckedChanged(object sender, EventArgs e)
+        {
+            if (modeStabilized.Checked) { FlightMode = flightModeEnum.Stabilized; }
+            else if (modeHorizon.Checked) { FlightMode = flightModeEnum.Horizon; }
+            else if(modeRate.Checked) { FlightMode = flightModeEnum.Rate; }
         }
 
         private void onClose(object sender, FormClosingEventArgs e)
@@ -417,6 +667,19 @@ namespace LeapDrone
 
             }
         }
+
+        public void serialThread()
+        {
+            while (true)
+            {
+                if (serialPort1.IsOpen)
+                {
+                    serialPort1.Write(dataOUT, 0, dataOUT.Length);
+                    System.Threading.Thread.Sleep(10);
+                }
+            }
+        }
+
     }
     public class HandValue
     {
@@ -546,4 +809,6 @@ namespace LeapDrone
         public bool Enabled { get => enabled; }
 
     }
+
+
 }
