@@ -19,9 +19,14 @@ namespace LeapDrone
     public partial class Form1 : Form
     {
         // ********************************* software state variable ************************************
-        static bool run = false; // set by start button ; reset by stop button
+        static bool run = false; // set by start button ; reset by stop button armed disarmed drone
         static bool simulation = false; // (simulazione = 0) => serial comm port ; (simulazione = 1) => run simuletion 
         static uint serialport_start = 0;
+        static bool ball_motion = true;   // true == ball motion game; false == drone
+        static int  start_frame;
+        static bool AirMode = false;
+        static float KP_Roll = 1, KP_Pitch = 1, KP_Yaw = 1, KP_Height = 1;
+        static float Offset_Roll = 0, Offset_Pitch = 0, Offset_Yaw = 0, Offset_Height = 0;
         // ******************************************* vJOY *********************************************
 
         // Declaring one joystick (Device id 1) and a position structure. 
@@ -33,7 +38,7 @@ namespace LeapDrone
         static int X, Y, RX, RY;
         static Thread t, tS;
 
-        static public byte[] dataOUT = new byte[10];
+        static public byte[] dataOUT = new byte[13];
 
         enum flightModeEnum : byte
         {
@@ -48,6 +53,8 @@ namespace LeapDrone
         // ******************************************* **** *********************************************
 
         static public Hand myHand;
+        static public Hand myHand_Left;
+        static public Hand myHand_Right;
         static public CircularBuffer<HandValue> myCircularBuff;
         static public Logger myLog;
 
@@ -214,50 +221,14 @@ namespace LeapDrone
 
  
         }
-        static void vJoyDataPack(Frame thisFrame, Form1 sender)
+        static void vJoyDataPack(float ROLL, float PITCH, float YAW, float THROTTLE, Frame thisFrame, Form1 sender)
         {
-            float ROLL = -99; // radinas
-            float PITCH = -99; // radinas
-            float YAW = -99; // radinas
-            float THROTTLE = -99;
-            // PACK data for Vjoy
-            if (thisFrame.Hands.Count > 0)
-            {
-                myHand = thisFrame.Hands.ElementAt(0);
-                ROLL = myHand.PalmNormal.Roll; // radinas
-                PITCH = myHand.Direction.Pitch; // radinas
-                YAW = myHand.Direction.Yaw; // radinas
-                THROTTLE = myHand.PalmPosition.z; // millimeters
-                if (THROTTLE < 200.0f) THROTTLE = 200.0f;
-                else if (THROTTLE > 400.0f) THROTTLE = 400.0f;
-
-                float costant_angle = (float)maxvalue / (1.0f * (float)Math.PI);
-                float costant_distance = (float)maxvalue / (200.0f);
-                float pi_half = (float)Math.PI / 2.0f;
-
-                X = (int)((YAW + pi_half) * costant_angle);
-                Y = (int)((THROTTLE - 200.0f) * costant_distance);
-                RX = (int)((ROLL + pi_half) * costant_angle);
-                RY = (int)((PITCH + pi_half) * costant_angle);
-
-                if (X < minvalue) X = (int)minvalue; else if (X > maxvalue) X = (int)maxvalue;
-                if (Y < minvalue) Y = (int)minvalue; else if (Y > maxvalue) Y = (int)maxvalue;
-                if (RX < minvalue) RX = (int)minvalue; else if (RX > maxvalue) RX = (int)maxvalue;
-                if (RY < minvalue) RY = (int)minvalue; else if (RY > maxvalue) RY = (int)maxvalue;
-
-            }
-            else
-            {
-                X =  (int)(minvalue + ((maxvalue - minvalue) / 2));
-                RX = (int)(minvalue + ((maxvalue - minvalue) / 2));
-                RY = (int)(minvalue + ((maxvalue - minvalue) / 2));
-                Y =  (int)(minvalue);
-            }
             //Display raw values
             sender.rollTXT.Text = ROLL.ToString();
             sender.pitchTXT.Text = PITCH.ToString();
             sender.yawTXT.Text = YAW.ToString();
             sender.heightTXT.Text = THROTTLE.ToString();
+
 
             //Display raw values
             sender.rollJOY.Text = RX.ToString();
@@ -284,47 +255,11 @@ namespace LeapDrone
                     myCircularBuff.Add(thisHand);
         }
 
-        static void serialCommData_pack(Frame thisFrame, Form1 sender)
+        static void serialCommData_pack(float ROLL, float PITCH, float YAW, float THROTTLE, Frame thisFrame, Form1 sender)
         {
             if (sender.serialPort1.IsOpen)
             {
-                float ROLL = -99;    // radinas
-                float PITCH = -99;   // radinas
-                float YAW = -99;     // radinas
-                float THROTTLE = -99;
-                // PACK data for serial
-                if (thisFrame.Hands.Count > 0)
-                {
-                    myHand = thisFrame.Hands.ElementAt(0);
-                    ROLL = myHand.PalmNormal.Roll; // radinas
-                    PITCH = myHand.Direction.Pitch; // radinas
-                    YAW = myHand.Direction.Yaw; // radinas
-                    THROTTLE = myHand.PalmPosition.z; // millimeters
-                    if (THROTTLE < 200.0f) THROTTLE = 200.0f;
-                    else if (THROTTLE > 400.0f) THROTTLE = 400.0f;
 
-                    float costant_angle = (float)maxvalue / (1.0f * (float)Math.PI);
-                    float costant_distance = (float)maxvalue / (200.0f);
-                    float pi_half = (float)Math.PI / 2.0f;
-
-                    X = (int)((YAW + pi_half) * costant_angle);
-                    Y = (int)((THROTTLE - 200.0f) * costant_distance);
-                    RX = (int)((ROLL + pi_half) * costant_angle);
-                    RY = (int)((PITCH + pi_half) * costant_angle);
-
-                    if (X < minvalue) X = (int)minvalue; else if (X > maxvalue) X = (int)maxvalue;
-                    if (Y < minvalue) Y = (int)minvalue; else if (Y > maxvalue) Y = (int)maxvalue;
-                    if (RX < minvalue) RX = (int)minvalue; else if (RX > maxvalue) RX = (int)maxvalue;
-                    if (RY < minvalue) RY = (int)minvalue; else if (RY > maxvalue) RY = (int)maxvalue;
-
-                }
-                else
-                {
-                    X = (int)(minvalue + ((maxvalue - minvalue) / 2));
-                    RX = (int)(minvalue + ((maxvalue - minvalue) / 2));
-                    RY = (int)(minvalue + ((maxvalue - minvalue) / 2));
-                    Y = (int)(minvalue);
-                }
                 //Display raw values
                 sender.rollTXT.Text = ROLL.ToString();
                 sender.pitchTXT.Text = PITCH.ToString();
@@ -349,36 +284,72 @@ namespace LeapDrone
                 thisHand.Height = Y;
                 thisHand.Timestamp = thisFrame.Timestamp;
 
-
-                //scrittura nella seriale 
-                dataOUT[0] = (byte)'$';
-                dataOUT[1] = 85;
-
-                uint Roll_to_send = ((uint)RX >> 6);     // CH1
-                uint Yaw_to_send = ((uint)X >> 6);
-                uint Pitch_to_send = ((uint)RY >> 6);
-                uint Height_to_send = ((uint)Y >> 6);
-                uint arm_disarm = 1000;
-
-                if (run)
+                if (ball_motion)
                 {
-                    arm_disarm = 0;     // armed
+                    int Roll_to_send = (int)(((float)(RX >> 7)) / 1.422f);
+                    int Pitch_to_send = (int)(((float)(RY >> 7)) / 1.422f);
+                    dataOUT[0] = (byte)'$';
+                    dataOUT[1] = (byte)'Y';
+                    dataOUT[2] = (byte)(((Roll_to_send % 1000) / 100) + 48);
+                    dataOUT[3] = (byte)(((Roll_to_send % 100) / 10) + 48);
+                    dataOUT[4] = (byte)((Roll_to_send % 10) + 48);
+                    dataOUT[5] = (byte)'#';
+                    dataOUT[6] = (byte)'$';
+                    dataOUT[7] = (byte)'X';
+                    dataOUT[8] = (byte)(((Pitch_to_send % 1000) / 100) + 48);
+                    dataOUT[9] = (byte)(((Pitch_to_send % 100) / 10) + 48);
+                    dataOUT[10] = (byte)((Pitch_to_send % 10) + 48);
+                    dataOUT[11] = (byte)'#';
                 }
                 else
                 {
-                    arm_disarm = 1000;  // disarmed
+                    //scrittura nella seriale 
+                    dataOUT[0] = (byte)'$';
+                    dataOUT[1] = 85;
+
+                    uint Roll_to_send = (uint)((float)((uint)RX >> 5)/1.28f);     // CH1
+                    uint Pitch_to_send = (uint)((float)((uint)RY >> 5) / 1.28f);
+                    uint Height_to_send = (uint)((float)((uint)Y >> 5) / 1.28f);
+                    uint Yaw_to_send = (uint)((float)((uint)X >> 5) / 1.28f);
+                    uint arm_disarm = 800;
+                    uint Air_mode = 0;
+                    uint Flight_mode = (uint)sender.FlightMode;
+                    uint CH8 = 0;
+
+                    if (AirMode)
+                    {
+                        Air_mode = 800;     
+                    }
+                    else
+                    {
+                        Air_mode = 0;  
+                    }
+
+
+                    if (run)
+                    {
+                        arm_disarm = 0;     // armed
+                    }
+                    else
+                    {
+                        arm_disarm = 800;   // disarmed
+                    }
+
+                    dataOUT[2] = (byte)(Roll_to_send >> 2);
+                    dataOUT[3] = (byte)((Roll_to_send << 6) | (Pitch_to_send >> 4));
+                    dataOUT[4] = (byte)((Pitch_to_send << 4) | (Height_to_send >> 6));
+                    dataOUT[5] = (byte)((Height_to_send << 2) | (Yaw_to_send >> 8));
+                    dataOUT[6] = (byte)(Yaw_to_send);
+                    dataOUT[7] = (byte)(arm_disarm >> 2);
+                    dataOUT[8] = (byte)((arm_disarm << 6) | (Air_mode >> 4));
+                    dataOUT[9] = (byte)((Air_mode << 4) | (Flight_mode >> 6));
+                    dataOUT[10] = (byte)((Flight_mode << 2) | (CH8 >> 8));
+                    dataOUT[11] = (byte)(CH8);
+                    dataOUT[12] = (byte)'#';
                 }
-
-                dataOUT[2] = (byte)(Roll_to_send >> 2);
-                dataOUT[3] = (byte)((Roll_to_send << 6) | (Pitch_to_send >> 4));
-                dataOUT[4] = (byte)((Pitch_to_send << 4) | (Height_to_send >> 6));
-                dataOUT[5] = (byte)((Height_to_send << 2) | (Yaw_to_send >> 8));
-                dataOUT[6] = (byte)(Yaw_to_send);
-                dataOUT[7] = (byte)(arm_disarm >> 2);
-                dataOUT[8] = (byte)((arm_disarm << 8) | (byte)sender.FlightMode);
-                dataOUT[9] = (byte)'#';
-
             }
+
+            
         }
 
         void newFrameHandler(object sender, FrameEventArgs eventArgs)
@@ -394,13 +365,92 @@ namespace LeapDrone
             this.displayFPS.Text = frame.CurrentFramesPerSecond.ToString();
             this.displayHandCount.Text = frame.Hands.Count.ToString();
 
-            if(simulation)
+            float ROLL = -99; // radinas
+            float PITCH = -99; // radinas
+            float YAW = -99; // radinas
+            float THROTTLE = -99;
+            // PACK data for Vjoy
+            if (frame.Hands.Count > 1)
             {
-                vJoyDataPack(frame, this);
+                if (start_frame > 10) // the first 10 frame are not used
+                {
+                    List<Hand> hands = frame.Hands;
+                    Hand firstHand = hands[0];
+
+                    if (firstHand.IsRight == true)
+                    {
+                        myHand_Right = firstHand;
+                    }
+                    else
+                    {
+                        myHand_Left = firstHand;
+                    }
+
+                    Hand secondHand = hands[1];
+                    if (secondHand.IsRight == true)
+                    {
+                        myHand_Right = secondHand;
+                    }
+                    else
+                    {
+                        myHand_Left = secondHand;
+                    }
+
+
+                    ROLL = myHand_Right.PalmNormal.Roll; // radinas
+                    PITCH = myHand_Right.Direction.Pitch; // radinas
+                    YAW = myHand_Right.Direction.Yaw; // radinas
+                    THROTTLE = myHand_Left.Direction.Pitch; // radinas
+
+
+                    float costant_angle = (float)maxvalue / (1.0f * (float)Math.PI);
+                    float costant_distance = (float)maxvalue / (200.0f);
+                    float pi_half = (float)Math.PI / 2.0f;
+
+                    X = (int)(((YAW * 1.5) + pi_half) * costant_angle);
+                    Y = (int)((THROTTLE * 2) * costant_angle);
+                    RX = (int)maxvalue - (int)(((ROLL * 1.5) + pi_half) * costant_angle);
+                    RY = (int)maxvalue - (int)(((PITCH * 1.5) + pi_half) * costant_angle);
+
+                    X = (int)(((float)(X) - ((int)maxvalue /2)) * KP_Yaw) + ((int)maxvalue / 2);
+                    Y = (int)((float)(Y) * KP_Height);
+                    RX = (int)(((float)(RX) - ((int)maxvalue / 2)) * KP_Roll) + ((int)maxvalue / 2);
+                    RY = (int)(((float)(RY) - ((int)maxvalue / 2)) * KP_Pitch) + ((int)maxvalue / 2);
+
+                    X = (int)((float)(X) + ((maxvalue/100) * Offset_Yaw));
+                    Y = (int)((float)(Y) + ((maxvalue / 100) * Offset_Height));
+                    RX = (int)((float)(RX) + ((maxvalue / 100) * Offset_Roll));
+                    RY = (int)((float)(RY) + ((maxvalue / 100) * Offset_Pitch));
+
+
+
+                    if (X < minvalue) X = (int)minvalue; else if (X > maxvalue) X = (int)maxvalue;
+                    if (Y < minvalue) Y = (int)minvalue; else if (Y > maxvalue) Y = (int)maxvalue;
+                    if (RX < minvalue) RX = (int)minvalue; else if (RX > maxvalue) RX = (int)maxvalue;
+                    if (RY < minvalue) RY = (int)minvalue; else if (RY > maxvalue) RY = (int)maxvalue;
+                }
+                else
+                {
+                    start_frame++;
+                }
             }
             else
             {
-                serialCommData_pack(frame, this);
+                X = (int)(minvalue + ((maxvalue - minvalue) / 2));
+                RX = (int)(minvalue + ((maxvalue - minvalue) / 2));
+                RY = (int)(minvalue + ((maxvalue - minvalue) / 2));
+                Y = (int)(minvalue);
+                start_frame = 0;
+            }
+
+            
+            if (simulation)
+            {
+                vJoyDataPack(ROLL, PITCH, YAW, THROTTLE, frame, this);
+            }
+            else
+            {
+                serialCommData_pack(ROLL, PITCH, YAW, THROTTLE, frame, this);
             }
             
         }
@@ -467,21 +517,9 @@ namespace LeapDrone
 
         }
 
-        private void button1_Click(object sender, EventArgs e)
-        {
-            run = true;
-            tB_Run.Text = "Run";
-        }
-
         private void groupBox3_Enter(object sender, EventArgs e)
         {
 
-        }
-
-        private void button2_Click(object sender, EventArgs e)
-        {
-            run = false;
-            tB_Run.Text = "Stop";
         }
 
         private void button3_Click(object sender, EventArgs e)
@@ -565,6 +603,109 @@ namespace LeapDrone
             if (modeStabilized.Checked) { FlightMode = flightModeEnum.Stabilized; }
             else if (modeHorizon.Checked) { FlightMode = flightModeEnum.Horizon; }
             else if(modeRate.Checked) { FlightMode = flightModeEnum.Rate; }
+        }
+
+        private void radioButton3_CheckedChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void Set_Drone_CheckedChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void radioButton2_CheckedChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void Ball_motion_CheckedChanged(object sender, EventArgs e)
+        {
+            ball_motion = !(ball_motion);
+        }
+
+        private void Drone_Armed(object sender, EventArgs e)
+        {
+            run = true;
+            tB_Run.Text = "Drone Armed";
+        }
+
+        private void exp_Pitch_ValueChanged(object sender, EventArgs e)
+        {
+            KP_Pitch = (float)(Kp_pitch.Value);
+        }
+
+        private void exp_Yaw_ValueChanged(object sender, EventArgs e)
+        {
+            KP_Yaw = (float)(Kp_yaw.Value);
+        }
+
+        private void chartCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void Offset_roll_ValueChanged(object sender, EventArgs e)
+        {
+            Offset_Roll = (float)(offset_roll.Value);
+        }
+
+        private void offset_pitch_ValueChanged(object sender, EventArgs e)
+        {
+            Offset_Pitch = (float)(offset_pitch.Value);
+        }
+
+        private void offset_yaw_ValueChanged(object sender, EventArgs e)
+        {
+            Offset_Yaw = (float)(offset_yaw.Value);
+        }
+
+        private void offset_height_ValueChanged(object sender, EventArgs e)
+        {
+            Offset_Height = (float)(offset_height.Value);
+        }
+
+        private void frameCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void reverse_roll_CheckedChanged(object sender, EventArgs e)
+        {
+     
+        }
+
+        private void AirModecheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            AirMode = AirModecheckBox.CheckState == CheckState.Checked ? true : false;
+        }
+
+        private void numericUpDown4_ValueChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label19_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void exp_Height_ValueChanged(object sender, EventArgs e)
+        {
+            KP_Height = (float)(Kp_height.Value);
+        }
+
+        private void exp_Roll_ValueChanged(object sender, EventArgs e)
+        {
+            KP_Roll = (float)(Kp_roll.Value);
+        }
+
+
+        private void drone_disarmed(object sender, EventArgs e)
+        {
+            run = false;
+            tB_Run.Text = "Drone Disarmed";
         }
 
         private void onClose(object sender, FormClosingEventArgs e)
@@ -675,10 +816,10 @@ namespace LeapDrone
                 if (serialPort1.IsOpen)
                 {
                     serialPort1.Write(dataOUT, 0, dataOUT.Length);
-                    System.Threading.Thread.Sleep(10);
+                    System.Threading.Thread.Sleep(20);
                 }
             }
-        }
+        } 
 
     }
     public class HandValue
