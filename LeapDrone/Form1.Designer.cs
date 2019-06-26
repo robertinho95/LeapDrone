@@ -45,6 +45,7 @@
             System.Windows.Forms.DataVisualization.Charting.Legend legend4 = new System.Windows.Forms.DataVisualization.Charting.Legend();
             System.Windows.Forms.DataVisualization.Charting.Series series4 = new System.Windows.Forms.DataVisualization.Charting.Series();
             System.Windows.Forms.DataVisualization.Charting.Title title4 = new System.Windows.Forms.DataVisualization.Charting.Title();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.displayID = new System.Windows.Forms.Label();
             this.displayTimestamp = new System.Windows.Forms.Label();
             this.displayFPS = new System.Windows.Forms.Label();
@@ -134,6 +135,7 @@
             this.reverse_yaw = new System.Windows.Forms.CheckBox();
             this.reverse_height = new System.Windows.Forms.CheckBox();
             this.label21 = new System.Windows.Forms.Label();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
             ((System.ComponentModel.ISupportInitialize)(this.displayImages)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.rollChart)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pitchChart)).BeginInit();
@@ -153,6 +155,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.offset_yaw)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.offset_pitch)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.offset_roll)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
             // displayID
@@ -199,6 +202,7 @@
             this.displayImages.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
             this.displayImages.TabIndex = 4;
             this.displayImages.TabStop = false;
+            this.displayImages.Click += new System.EventHandler(this.displayImages_Click);
             // 
             // RollLabel
             // 
@@ -1210,11 +1214,22 @@
             this.label21.TabIndex = 68;
             this.label21.Text = "Reverse";
             // 
+            // pictureBox1
+            // 
+            this.pictureBox1.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox1.Image")));
+            this.pictureBox1.Location = new System.Drawing.Point(15, 905);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(1212, 144);
+            this.pictureBox1.TabIndex = 69;
+            this.pictureBox1.TabStop = false;
+            this.pictureBox1.Click += new System.EventHandler(this.pictureBox1_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1319, 895);
+            this.ClientSize = new System.Drawing.Size(1267, 1061);
+            this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.label21);
             this.Controls.Add(this.reverse_height);
             this.Controls.Add(this.reverse_yaw);
@@ -1306,6 +1321,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.offset_yaw)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.offset_pitch)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.offset_roll)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1402,6 +1418,7 @@
         private System.Windows.Forms.CheckBox reverse_yaw;
         private System.Windows.Forms.CheckBox reverse_height;
         private System.Windows.Forms.Label label21;
+        private System.Windows.Forms.PictureBox pictureBox1;
     }
 }
 

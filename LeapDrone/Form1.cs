@@ -676,6 +676,16 @@ namespace LeapDrone
      
         }
 
+        private void pictureBox1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void displayImages_Click(object sender, EventArgs e)
+        {
+
+        }
+
         private void AirModecheckBox_CheckedChanged(object sender, EventArgs e)
         {
             AirMode = AirModecheckBox.CheckState == CheckState.Checked ? true : false;
